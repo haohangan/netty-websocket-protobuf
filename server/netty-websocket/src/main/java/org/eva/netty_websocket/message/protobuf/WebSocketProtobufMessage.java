@@ -28,13 +28,13 @@ public final class WebSocketProtobufMessage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\017WSMessage.proto\"\222\001\n\tWSMessage\022\013\n\003mid\030\001" +
+      "\n\017WSMessage.proto\"\235\001\n\tWSMessage\022\013\n\003mid\030\001" +
       " \001(\003\022 \n\004type\030\002 \001(\0162\022.WSMessage.MsgType\022\013" +
-      "\n\003uid\030\003 \001(\t\022\014\n\004t_id\030\004 \001(\t\022\013\n\003txt\030\005 \001(\t\"." +
+      "\n\003uid\030\003 \001(\t\022\014\n\004t_id\030\004 \001(\t\022\013\n\003txt\030\005 \001(\t\"9" +
       "\n\007MsgType\022\007\n\003MSG\020\000\022\007\n\003TXT\020\001\022\010\n\004TIME\020\002\022\007\n" +
-      "\003REG\020\003BF\n(org.eva.netty_websocket.messag" +
-      "e.protobufB\030WebSocketProtobufMessageP\001b\006" +
-      "proto3"
+      "\003REG\020\003\022\t\n\005GROUP\020\004BF\n(org.eva.netty_webso" +
+      "cket.message.protobufB\030WebSocketProtobuf" +
+      "MessageP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

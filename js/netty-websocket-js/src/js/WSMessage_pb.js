@@ -276,7 +276,8 @@ proto.WSMessage.MsgType = {
   MSG: 0,
   TXT: 1,
   TIME: 2,
-  REG: 3
+  REG: 3,
+  GROUP: 4
 };
 
 goog.object.extend(exports, proto);

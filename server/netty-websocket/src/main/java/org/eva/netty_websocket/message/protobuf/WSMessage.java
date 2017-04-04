@@ -121,6 +121,10 @@ private WSMessage(
      * <code>REG = 3;</code>
      */
     REG(3),
+    /**
+     * <code>GROUP = 4;</code>
+     */
+    GROUP(4),
     UNRECOGNIZED(-1),
     ;
 
@@ -140,6 +144,10 @@ private WSMessage(
      * <code>REG = 3;</code>
      */
     public static final int REG_VALUE = 3;
+    /**
+     * <code>GROUP = 4;</code>
+     */
+    public static final int GROUP_VALUE = 4;
 
 
     public final int getNumber() {
@@ -164,6 +172,7 @@ private WSMessage(
         case 1: return TXT;
         case 2: return TIME;
         case 3: return REG;
+        case 4: return GROUP;
         default: return null;
       }
     }

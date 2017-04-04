@@ -27,13 +27,18 @@ public class JavaConsoleClient2 {
 			if (line == null) {
 				break;
 			}
-			client.write(uid, tid, line);
+			
 			// Sends the received line to the server.
 			// If user typed the 'bye' command, wait until the server closes
 			// the connection.
-			if ("bye".equals(line.toLowerCase())) {
+			if("group".equals(line.toLowerCase())){
+				client.writeGroup(uid, "ALL", "aaaaaaaaa");
+				
+			}else if ("bye".equals(line.toLowerCase())) {
 				client.close();
 				break;
+			}else{
+				client.write(uid, tid, line);
 			}
 		}
 		System.out.println("挂壁");

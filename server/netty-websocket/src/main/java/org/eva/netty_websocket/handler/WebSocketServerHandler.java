@@ -8,7 +8,8 @@ import java.util.logging.Logger;
 import org.eva.netty_websocket.message.MessageProgress;
 import org.eva.netty_websocket.message.protobuf.ProtebufMessageProgress;
 import org.eva.netty_websocket.user.DatabaseUser;
-import org.eva.netty_websocket.user.UserManager;
+import org.eva.netty_websocket.user.GroupManager;
+import org.eva.netty_websocket.user.UserInfo;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
@@ -44,9 +45,9 @@ import io.netty.util.concurrent.GenericFutureListener;
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
 	static Logger logger = Logger.getLogger(WebSocketServerHandler.class.getName());
-	
+
 	Injector injector;
-	
+
 	public WebSocketServerHandler(Injector injector) {
 		super();
 		this.injector = injector;
@@ -93,7 +94,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 			return;// 直接退回
 		}
 		final String uid = list.get(0);
-//		DatabaseUser db = new MemoryUserModel();
+		// DatabaseUser db = new MemoryUserModel();
 		DatabaseUser db = injector.getInstance(DatabaseUser.class);
 		if (!db.checkUserPasswd(uid, pwds.get(0))) {//
 			auth(ctx, "error pwd");
@@ -109,8 +110,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 				@Override
 				public void operationComplete(Future<? super Void> future) throws Exception {
 					if (future.isSuccess()) {
-						UserManager.create(ctx, uid);
-						logger.severe("added channel:" + ctx.channel().remoteAddress());
+						UserInfo userInfo = new UserInfo(ctx, uid);
+						ctx.channel().attr(UserInfo.CHANNEL_INFO).set(userInfo);//用户登录
+						logger.severe("成功登陆:" + ctx.channel().remoteAddress());
 					}
 				}
 			});
@@ -151,8 +153,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		if (frame instanceof TextWebSocketFrame) {
 			logger.log(Level.SEVERE, "无法解析TextWebSocketFrame");
 			TextWebSocketFrame txt = (TextWebSocketFrame) frame;
-			String rtn = ctx.channel().attr(UserManager.CHANNEL_INFO).get().getUid() + ":无法解析TextWebSocketFrame:"
-					+ txt.text();
+			String rtn = getUserInfo(ctx).getUid() + ":无法解析TextWebSocketFrame:" + txt.text();
 			ctx.channel().writeAndFlush(new TextWebSocketFrame(rtn));
 			return;
 		}
@@ -175,7 +176,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		cause.printStackTrace();
-		UserManager.remove(ctx);
+		removeUser(ctx);
 		ctx.channel().writeAndFlush(new TextWebSocketFrame("err:" + cause.getMessage()));
 		ctx.close();
 	}
@@ -186,10 +187,26 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		logger.log(Level.SEVERE, "收到" + incoming.remoteAddress() + " 握手请求");
 	}
 
+	/**
+	 * 断开连接
+	 */
 	@Override
 	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-		UserManager.remove(ctx);
-		UserManager.print();
+		removeUser(ctx);
+//		handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+		GroupManager.INSTANCE.showAllMembers();
+		GroupManager.INSTANCE.showGroups();
 	}
 
+	private UserInfo getUserInfo(ChannelHandlerContext ctx) {
+		return ctx.channel().attr(UserInfo.CHANNEL_INFO).get();
+	}
+
+	private void removeUser(ChannelHandlerContext ctx){
+		UserInfo ui = getUserInfo(ctx);
+		if(ui != null){
+			ui.logout();
+			ctx.channel().attr(UserInfo.CHANNEL_INFO).set(null);
+		}
+	}
 }

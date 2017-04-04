@@ -3,8 +3,9 @@ package org.eva.netty_websocket.handler;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.eva.netty_cloud.group.Group;
 import org.eva.netty_websocket.inject.DBInjector;
-import org.eva.netty_websocket.user.UserManager;
+import org.eva.netty_websocket.user.GroupManager;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -18,7 +19,6 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -33,7 +33,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 public class WSServer {
 	static final int DEFAULT_PORT = 80;
 	static boolean SSL = false;// 不开启ssl
-	Injector injector;//依赖
+	Injector injector;// 依赖
 
 	public void run(int port) throws Exception {
 		final SslContext sslCtx;
@@ -43,12 +43,16 @@ public class WSServer {
 		} else {
 			sslCtx = null;
 		}
+		
+		
+		System.out.println("初始化依赖控制");
+		injector = Guice.createInjector(new DBInjector());
+		Group.INSTANCE.initGroups();
+		GroupManager.INSTANCE.createNewChannelGroup(Group.INSTANCE.getAllGroup());
 
 		EventLoopGroup bossGroup = bossGroup();
 		EventLoopGroup workGroup = workGroup();
 
-		System.out.println("初始化依赖控制");
-		injector = Guice.createInjector(new DBInjector());
 		try {
 			ServerBootstrap serverBootstrap = new ServerBootstrap();
 			serverBootstrap.group(bossGroup, workGroup).option(ChannelOption.SO_BACKLOG, 1024)
@@ -59,18 +63,18 @@ public class WSServer {
 				serverBootstrap.channel(NioServerSocketChannel.class);
 			}
 			serverBootstrap.handler(new LoggingHandler(LogLevel.INFO))
-					.childHandler(new WebSocketServerInitializer(sslCtx,injector));
+					.childHandler(new WebSocketServerInitializer(sslCtx, injector));
 			Channel channel = serverBootstrap.bind(port).sync().channel();
 			System.out.println("netty websocket启动成功，端口：" + port);
 			Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
 
 				@Override
 				public void run() {
-//					String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss"));
-					String time = "time:"+System.currentTimeMillis();
-					UserManager.members.forEach((k,v)->{
-						v.writeAndFlush(new TextWebSocketFrame(time));
-					});
+					// String now =
+					// LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd
+					// HH:mm:ss"));
+//					String time = "time:" + System.currentTimeMillis();
+//					GroupManager.INSTANCE.writeToAllMembers(new TextWebSocketFrame(time));
 				}
 			}, 1000 * 5, 1000, TimeUnit.MILLISECONDS);
 			channel.closeFuture().sync();

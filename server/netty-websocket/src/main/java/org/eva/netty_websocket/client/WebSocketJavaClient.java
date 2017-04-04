@@ -75,6 +75,12 @@ public class WebSocketJavaClient {
 				.setTId(tid).setTxt(msg).build();
 		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}
+	
+	public void writeGroup(String uid, String groupName, String msg) {
+		WSMessage writemsg = WSMessage.newBuilder().setType(MsgType.GROUP).setMid(reqTime.incrementAndGet()).setUid(uid)
+				.setTId(groupName).setTxt(msg).build();
+		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+	}
 
 	public void close() {
 		if (lastWriteFuture != null) {
