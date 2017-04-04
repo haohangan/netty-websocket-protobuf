@@ -17,7 +17,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.CharsetUtil;
 
 /**
- * websocket客户端消息处理handler
+ * websocket java客户端消息处理handler
  * 
  * @author 976175665
  * @date 2017年4月4日 下午4:59:53

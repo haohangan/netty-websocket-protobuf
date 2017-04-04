@@ -23,6 +23,12 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 
+/**
+ * websocket java客户端简单封装
+ * 
+ * @author 976175665
+ * @date 2017年4月4日 下午7:35:31
+ */
 public class WebSocketJavaClient {
 	private AtomicLong reqTime = new AtomicLong(0);
 	private Channel channel;
@@ -56,7 +62,6 @@ public class WebSocketJavaClient {
 		try {
 			channel = b.connect("127.0.0.1", 80).sync().channel();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
 			close();
 		}
 	}
@@ -66,8 +71,8 @@ public class WebSocketJavaClient {
 	}
 
 	public void write(String uid, String tid, String msg) {
-		WSMessage writemsg = WSMessage.newBuilder().setType(MsgType.MSG).setMid(reqTime.incrementAndGet()).setUid(uid).setTId(tid)
-				.setTxt(msg).build();
+		WSMessage writemsg = WSMessage.newBuilder().setType(MsgType.MSG).setMid(reqTime.incrementAndGet()).setUid(uid)
+				.setTId(tid).setTxt(msg).build();
 		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}
 
@@ -76,7 +81,6 @@ public class WebSocketJavaClient {
 			try {
 				lastWriteFuture.sync();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
 		channel.closeFuture();

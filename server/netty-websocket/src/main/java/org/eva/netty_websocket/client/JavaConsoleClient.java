@@ -18,7 +18,11 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-
+/**
+ * 测试时候使用的类
+ * @author 976175665
+ * @date 2017年4月4日 下午7:34:46
+ */
 public class JavaConsoleClient {
 	static final String url = "ws://127.0.0.1/websocket?uname=jack&pwd=";
 	static final String subprotocol = "zookeeperWS";
