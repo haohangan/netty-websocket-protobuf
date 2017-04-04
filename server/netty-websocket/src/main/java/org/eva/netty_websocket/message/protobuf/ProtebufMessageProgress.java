@@ -9,6 +9,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import io.netty.channel.ChannelHandlerContext;
 
+/**
+ * 用来解析并处理WSMessage消息
+ * 
+ * @author 976175665
+ * @date 2017年4月4日 下午7:40:55
+ */
 public class ProtebufMessageProgress extends AbstractMessageProcess {
 	WSMessage usermsg;
 	DatabaseUser database;
@@ -43,7 +49,7 @@ public class ProtebufMessageProgress extends AbstractMessageProcess {
 	 * 
 	 */
 	@Override
-	protected void writeBack(String msg) {//new BinaryWebSocketFrame()
+	protected void writeBack(String msg) {// new BinaryWebSocketFrame()
 		WSMessage writemsg = WSMessage.newBuilder(usermsg).setTxt(msg).build();
 		ctx.channel().writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}

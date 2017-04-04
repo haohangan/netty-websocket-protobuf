@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 import com.google.common.base.Strings;
 
 /**
- * 无需密码就可以登陆，测试时使用
+ * 无需密码就可以登陆，仅测试时使用
  * 
  * @author 976175665
  * @date 2017年4月4日 下午2:41:43
