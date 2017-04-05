@@ -2,6 +2,7 @@ package org.eva.netty_websocket.message.protobuf;
 
 import org.eva.netty_websocket.message.AbstractMessageProcess;
 import org.eva.netty_websocket.user.GroupManager;
+import org.eva.netty_websocket.user.UserInfo;
 import org.eva.netty_websocket.util.ProtobufMessageUtil;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -20,6 +21,7 @@ public class ProtebufMessageProgress extends AbstractMessageProcess {
 	public ProtebufMessageProgress(ChannelHandlerContext ctx, byte[] bytes) throws InvalidProtocolBufferException {
 		super(ctx);
 		this.usermsg = WSMessage.parseFrom(bytes);
+		ui = ctx.channel().attr(UserInfo.CHANNEL_INFO).get();
 	}
 
 	@Override

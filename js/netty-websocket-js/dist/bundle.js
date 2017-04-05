@@ -10666,6 +10666,8 @@ function conn(uid,pwd){
 		$('#Send_Button').attr("disabled",null);
 		$('#SendBin_Button').attr("disabled",null);
 		$('#Close_Button').attr("disabled",null);
+		$('#Reg_Button').attr("disabled",null);
+		$('#Send_Group_Button').attr("disabled",null);
 	};
 	websocket.onclose = function(){
 		console.info("关闭websocket.");
@@ -10673,6 +10675,8 @@ function conn(uid,pwd){
 		$('#Send_Button').attr("disabled","disabled");
 		$('#SendBin_Button').attr("disabled","disabled");
 		$('#Close_Button').attr("disabled","disabled");
+		$('#Reg_Button').attr("disabled","disabled");
+		$('#Send_Group_Button').attr("disabled","disabled");
 	};
 	websocket.onerror =  function(){
 		console.info("websocket error");
@@ -10718,6 +10722,29 @@ function sendBin(userid,txt){
 	websocket.send(bytes);
 }
 
+function reg(groupName){
+	reqtime = reqtime +1;
+	var message = new proto.WSMessage();
+	message.setType(proto.WSMessage.MsgType.REG);
+	message.setMid(reqtime);
+	message.setUid(uid);
+	message.setTId(groupName);
+	bytes = message.serializeBinary();
+	websocket.send(bytes);
+}
+
+function broadCast(groupName,txt){
+	reqtime = reqtime +1;
+	var message = new proto.WSMessage();
+	message.setType(proto.WSMessage.MsgType.GROUP);
+	message.setMid(reqtime);
+	message.setUid(uid);
+	message.setTId(groupName);
+	message.setTxt(txt);
+	bytes = message.serializeBinary();
+	websocket.send(bytes);
+}
+
 function closeWebsocket(){
     websocket.close();
 }
@@ -10736,6 +10763,20 @@ function closeWebsocket(){
 		var txt = $("#txt").val();
 		sendBin(tid,txt);
 		$("#txt").val('');
+   });
+   
+    $('#Reg_Button').click(function(){
+	   var groupName = $("#reg").val();
+		reg(groupName);
+		$("#reg").val('');
+   });
+   
+    $('#Send_Group_Button').click(function(){
+	    var group = $("#group").val();
+		var group_txt = $("#group_txt").val();
+		broadCast(group,group_txt);
+		$("#group").val('');
+		$("#group_txt").val('');
    });
    
    $('#Clear_Button').click(function(){

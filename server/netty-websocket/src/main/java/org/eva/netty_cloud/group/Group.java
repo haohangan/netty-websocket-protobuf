@@ -9,6 +9,8 @@ public enum Group {
 	INSTANCE;
 
 	private final Set<String> COMMON_GROUP = new HashSet<>();
+	
+	private final Set<String> OTHER_GROUP = new HashSet<>();
 
 	public void initGroups() {
 		Properties prop = new Properties();
@@ -21,10 +23,18 @@ public enum Group {
 			e.printStackTrace();
 		}
 	}
+	
+	public void addSpecial(String groupName){
+		if(COMMON_GROUP.contains(groupName)){
+			return;
+		}
+		OTHER_GROUP.add(groupName);
+	}
 
 	public Set<String> getAllGroup() {
 		Set<String> set = new HashSet<>();
 		set.addAll(COMMON_GROUP);
+		set.addAll(OTHER_GROUP);
 		return set;
 	}
 

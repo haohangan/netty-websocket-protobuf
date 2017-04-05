@@ -43,12 +43,12 @@ public class WSServer {
 		} else {
 			sslCtx = null;
 		}
-		
-		
+
 		System.out.println("初始化依赖控制");
-		injector = Guice.createInjector(new DBInjector());
+		injector = Guice.createInjector(new DBInjector());//多个injector
 		Group.INSTANCE.initGroups();
-		GroupManager.INSTANCE.createNewChannelGroup(Group.INSTANCE.getAllGroup());
+		Group.INSTANCE.addSpecial("USERS");
+		GroupManager.INSTANCE.createNewChannelGroup(Group.INSTANCE.getAllGroup());// 初始化时初始化用户组，其他时间不可新增用户组
 
 		EventLoopGroup bossGroup = bossGroup();
 		EventLoopGroup workGroup = workGroup();
@@ -73,8 +73,9 @@ public class WSServer {
 					// String now =
 					// LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd
 					// HH:mm:ss"));
-//					String time = "time:" + System.currentTimeMillis();
-//					GroupManager.INSTANCE.writeToAllMembers(new TextWebSocketFrame(time));
+					// String time = "time:" + System.currentTimeMillis();
+					// GroupManager.INSTANCE.writeToAllMembers(new
+					// TextWebSocketFrame(time));
 				}
 			}, 1000 * 5, 1000, TimeUnit.MILLISECONDS);
 			channel.closeFuture().sync();
