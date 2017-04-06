@@ -1,6 +1,7 @@
 package org.eva.netty_websocket.util;
 
 import com.google.protobuf.AbstractMessageLite;
+import com.google.protobuf.MessageLite;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -20,7 +21,7 @@ public class ProtobufMessageUtil {
 		return Unpooled.copiedBuffer(bytes);
 	}
 
-	public static BinaryWebSocketFrame getFrame(AbstractMessageLite<?, ?> proto) {
+	public static BinaryWebSocketFrame getFrame(MessageLite proto) {
 		byte[] bytes = proto.toByteArray();
 		ByteBuf buf = Unpooled.copiedBuffer(bytes);
 		return new BinaryWebSocketFrame(buf);

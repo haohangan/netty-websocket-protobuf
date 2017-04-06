@@ -7,6 +7,8 @@ import org.eva.netty_websocket.message.protobuf.WSMessage;
 import org.eva.netty_websocket.message.protobuf.WSMessage.MsgType;
 import org.eva.netty_websocket.util.ProtobufMessageUtil;
 
+import com.google.protobuf.MessageLite;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -60,7 +62,7 @@ public class WebSocketJavaClient {
 
 		});
 		try {
-			channel = b.connect("127.0.0.1", 80).sync().channel();
+			channel = b.connect(uri.getHost(), uri.getPort()).sync().channel();
 		} catch (InterruptedException e) {
 			close();
 		}
@@ -70,16 +72,20 @@ public class WebSocketJavaClient {
 		lastWriteFuture = channel.writeAndFlush(new TextWebSocketFrame(msg));
 	}
 
+	public void write(MessageLite writemsg) {
+		lastWriteFuture = channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+	}
+
 	public void write(String uid, String tid, String msg) {
 		WSMessage writemsg = WSMessage.newBuilder().setType(MsgType.MSG).setMid(reqTime.incrementAndGet()).setUid(uid)
 				.setTId(tid).setTxt(msg).build();
-		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		lastWriteFuture = channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}
-	
+
 	public void writeGroup(String uid, String groupName, String msg) {
 		WSMessage writemsg = WSMessage.newBuilder().setType(MsgType.GROUP).setMid(reqTime.incrementAndGet()).setUid(uid)
 				.setTId(groupName).setTxt(msg).build();
-		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		lastWriteFuture = channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}
 
 	public void close() {
