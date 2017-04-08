@@ -10659,7 +10659,7 @@ var uid;
 var reqtime = 0;
 
 function conn(uid,pwd){
-	websocket = new WebSocket("ws://127.0.0.1/websocket?uname="+uid+'&pwd='+pwd,"zookeeperWS");
+	websocket = new WebSocket("ws://127.0.0.1:8080/websocket?uname="+uid+'&pwd='+pwd,"zookeeperWS");
 	websocket.onopen = function(){
 		console.info("打开websocket.");
 		$('#Open_Button').attr("disabled","disabled");

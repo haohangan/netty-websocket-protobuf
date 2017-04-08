@@ -15,6 +15,8 @@ import io.netty.channel.ChannelHandlerContext;
 public abstract class AbstractMessageProcess implements MessageProgress, UserManager {
 	protected ChannelHandlerContext ctx;
 	protected UserInfo ui;
+	
+	public AbstractMessageProcess(){}
 
 	public AbstractMessageProcess(ChannelHandlerContext ctx) {
 		super();
@@ -23,6 +25,8 @@ public abstract class AbstractMessageProcess implements MessageProgress, UserMan
 	}
 
 	protected abstract void writeBack(String msg);// 使用不同的消息，需要具体的实现
+	
+	protected abstract void init(ChannelHandlerContext ctx,byte[] bytes) throws Exception ;// 使用不同的消息，需要具体的实现
 
 	/**
 	 * 传递消息

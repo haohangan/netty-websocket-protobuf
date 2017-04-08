@@ -8,6 +8,6 @@ package org.eva.netty_websocket.user;
  */
 public interface DatabaseUser {
 
-	boolean checkUserPasswd(String userid, String passwd);
+	LoginResult checkUserPasswd(String userid, String passwd);
 
 }

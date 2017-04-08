@@ -5,8 +5,6 @@ import org.eva.netty_websocket.user.GroupManager;
 import org.eva.netty_websocket.user.UserInfo;
 import org.eva.netty_websocket.util.ProtobufMessageUtil;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -18,14 +16,16 @@ import io.netty.channel.ChannelHandlerContext;
 public class ProtebufMessageProgress extends AbstractMessageProcess {
 	WSMessage usermsg;
 
-	public ProtebufMessageProgress(ChannelHandlerContext ctx, byte[] bytes) throws InvalidProtocolBufferException {
-		super(ctx);
-		this.usermsg = WSMessage.parseFrom(bytes);
-		ui = ctx.channel().attr(UserInfo.CHANNEL_INFO).get();
-	}
+	public ProtebufMessageProgress(){}
+	
+//	public ProtebufMessageProgress(ChannelHandlerContext ctx, byte[] bytes) throws InvalidProtocolBufferException {
+//		super(ctx);
+//		this.usermsg = WSMessage.parseFrom(bytes);
+//	}
 
 	@Override
-	public void progress() {
+	public void progress(ChannelHandlerContext ctx, byte[] bytes) throws Exception {
+		init(ctx,bytes);
 		switch (usermsg.getType()) {
 		case MSG:// 用户消息
 			String tid = usermsg.getTId();// 目标用户id
@@ -61,6 +61,13 @@ public class ProtebufMessageProgress extends AbstractMessageProcess {
 	protected void writeBack(String msg) {// new BinaryWebSocketFrame()
 		WSMessage writemsg = WSMessage.newBuilder(usermsg).setTxt(msg).build();
 		ctx.channel().writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+	}
+
+	@Override
+	public void init(ChannelHandlerContext ctx, byte[] bytes) throws Exception {
+		this.ctx = ctx;
+		ui = ctx.channel().attr(UserInfo.CHANNEL_INFO).get();
+		this.usermsg = WSMessage.parseFrom(bytes);
 	}
 
 }

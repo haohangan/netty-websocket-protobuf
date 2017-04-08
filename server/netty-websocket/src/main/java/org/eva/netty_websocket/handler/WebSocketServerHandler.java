@@ -6,14 +6,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eva.netty_websocket.message.MessageProgress;
-import org.eva.netty_websocket.message.protobuf.ProtebufMessageProgress;
 import org.eva.netty_websocket.user.DatabaseUser;
 import org.eva.netty_websocket.user.GroupManager;
+import org.eva.netty_websocket.user.LoginResult;
 import org.eva.netty_websocket.user.UserInfo;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -47,10 +46,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 	static Logger logger = Logger.getLogger(WebSocketServerHandler.class.getName());
 
 	Injector injector;
+	String websocket_path;
 
-	public WebSocketServerHandler(Injector injector) {
+	public WebSocketServerHandler(Injector injector, String websocket_path) {
 		super();
 		this.injector = injector;
+		this.websocket_path = websocket_path;
 	}
 
 	static {
@@ -66,6 +67,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+		// try {
 		if (msg instanceof FullHttpRequest) {
 			handleHttpRequest(ctx, (FullHttpRequest) msg);// 仅仅第一次走这个分支
 		} else if (msg instanceof WebSocketFrame) {
@@ -73,6 +75,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		} else {
 			throw new Exception("真的是无法理解");
 		}
+		// } finally {
+		// ReferenceCountUtil.release(msg);
+		// }
 	}
 
 	/**
@@ -96,7 +101,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		final String uid = list.get(0);
 		// DatabaseUser db = new MemoryUserModel();
 		DatabaseUser db = injector.getInstance(DatabaseUser.class);
-		if (!db.checkUserPasswd(uid, pwds.get(0))) {//
+		LoginResult lr = db.checkUserPasswd(uid, pwds.get(0));
+		if (!lr.isCheckpwd()) {//
 			auth(ctx, "error pwd");
 			return;// 直接退回
 		}
@@ -110,8 +116,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 				@Override
 				public void operationComplete(Future<? super Void> future) throws Exception {
 					if (future.isSuccess()) {
-						UserInfo userInfo = new UserInfo(ctx, uid);
-						ctx.channel().attr(UserInfo.CHANNEL_INFO).set(userInfo);//用户登录
+						UserInfo userInfo = new UserInfo(ctx, uid, lr.getRole());
+						ctx.channel().attr(UserInfo.CHANNEL_INFO).set(userInfo);// 用户登录
 						logger.severe("成功登陆:" + ctx.channel().remoteAddress());
 					}
 				}
@@ -137,8 +143,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 	 */
 	private WebSocketServerHandshakerFactory factory(FullHttpRequest request) {
 		return new WebSocketServerHandshakerFactory(
-				"ws://" + request.headers().get(HttpHeaderNames.HOST) + CommonParam.WEBSOCKET_PATH,
-				CommonParam.SUB_PROTOCOL, true);
+				"ws://" + request.headers().get(HttpHeaderNames.HOST) + websocket_path, CommonParam.SUB_PROTOCOL, true);
 	}
 
 	public void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
@@ -163,9 +168,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 			binframe.content().readBytes(bytes);
 
 			try {
-				MessageProgress mp = new ProtebufMessageProgress(ctx, bytes);
-				mp.progress();
-			} catch (InvalidProtocolBufferException e) {
+				MessageProgress mp = injector.getInstance(MessageProgress.class);
+				mp.progress(ctx, bytes);
+			} catch (Exception e) {
 				e.printStackTrace();
 				logger.log(Level.SEVERE, "无法解析", e);
 			}
@@ -193,7 +198,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 	@Override
 	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
 		removeUser(ctx);
-//		handshaker.close(ctx.channel(), new CloseWebSocketFrame());
+		// handshaker.close(ctx.channel(), new CloseWebSocketFrame());
 		GroupManager.INSTANCE.showAllMembers();
 		GroupManager.INSTANCE.showGroups();
 	}
@@ -202,9 +207,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		return ctx.channel().attr(UserInfo.CHANNEL_INFO).get();
 	}
 
-	private void removeUser(ChannelHandlerContext ctx){
+	private void removeUser(ChannelHandlerContext ctx) {
 		UserInfo ui = getUserInfo(ctx);
-		if(ui != null){
+		if (ui != null) {
 			ui.logout();
 			ctx.channel().attr(UserInfo.CHANNEL_INFO).set(null);
 		}

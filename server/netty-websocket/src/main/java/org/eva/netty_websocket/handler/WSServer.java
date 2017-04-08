@@ -35,7 +35,7 @@ public class WSServer {
 	static boolean SSL = false;// 不开启ssl
 	Injector injector;// 依赖
 
-	public void run(int port) throws Exception {
+	public void run(int port,String nodeName) throws Exception {
 		final SslContext sslCtx;
 		if (SSL) {
 			SelfSignedCertificate cercificate = new SelfSignedCertificate();
@@ -63,7 +63,7 @@ public class WSServer {
 				serverBootstrap.channel(NioServerSocketChannel.class);
 			}
 			serverBootstrap.handler(new LoggingHandler(LogLevel.INFO))
-					.childHandler(new WebSocketServerInitializer(sslCtx, injector));
+					.childHandler(new WebSocketServerInitializer(sslCtx, injector,nodeName));
 			Channel channel = serverBootstrap.bind(port).sync().channel();
 			System.out.println("netty websocket启动成功，端口：" + port);
 			Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {

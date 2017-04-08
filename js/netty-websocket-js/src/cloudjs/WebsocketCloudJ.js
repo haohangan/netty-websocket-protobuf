@@ -3,15 +3,15 @@ var $ = require('jquery');
 /**
  * 创建websocket连接
  */
-var host = "localhost";
+var host = "localhost";//ws://127.0.0.1:81/app1?uname=
 var port = 80;
-var basePath = "/websocket";
+var basePath = "/app1";
 var websocket;
 var uid;
 var reqtime = 0;
 
-function conn(uid,pwd){
-	websocket = new WebSocket("ws://127.0.0.1:8080/websocket?uname="+uid+'&pwd='+pwd,"zookeeperWS");
+function conn(uid,url){
+	websocket = new WebSocket(url+uid+'&pwd=pwd',"zookeeperWS");
 	websocket.onopen = function(){
 		console.info("打开websocket.");
 		$('#Open_Button').attr("disabled","disabled");
@@ -45,7 +45,7 @@ function conn(uid,pwd){
 				reader.addEventListener("loadend", function() {
 				   // reader.result contains the contents of blob as a typed array
 				   var bytes = reader.result;
-				   var message = proto.WSMessage.deserializeBinary(bytes);
+				   var message = proto.WSCMessage.deserializeBinary(bytes);
 				   $('#server').prepend(message.getUid()+'-->'+message.getTxt()+'-->'+message.getTId()+'<br /> ');
 				});
 				reader.readAsArrayBuffer(data);
@@ -64,35 +64,38 @@ function send(message){
 
 function sendBin(userid,txt){
 	reqtime = reqtime +1;
-	var message = new proto.WSMessage();
-	message.setType(proto.WSMessage.MsgType.MSG);
+	var message = new proto.WSCMessage();
+	message.setType(proto.WSCMessage.MsgType.MSG);
 	message.setMid(reqtime);
 	message.setUid(uid);
 	message.setTId(userid);
 	message.setTxt(txt);
+	message.setBroadcast(true);
 	bytes = message.serializeBinary();
 	websocket.send(bytes);
 }
 
 function reg(groupName){
 	reqtime = reqtime +1;
-	var message = new proto.WSMessage();
-	message.setType(proto.WSMessage.MsgType.REG);
+	var message = new proto.WSCMessage();
+	message.setType(proto.WSCMessage.MsgType.REG);
 	message.setMid(reqtime);
 	message.setUid(uid);
 	message.setTId(groupName);
+	message.setBroadcast(false);
 	bytes = message.serializeBinary();
 	websocket.send(bytes);
 }
 
 function broadCast(groupName,txt){
 	reqtime = reqtime +1;
-	var message = new proto.WSMessage();
-	message.setType(proto.WSMessage.MsgType.GROUP);
+	var message = new proto.WSCMessage();
+	message.setType(proto.WSCMessage.MsgType.GROUP);
 	message.setMid(reqtime);
 	message.setUid(uid);
 	message.setTId(groupName);
 	message.setTxt(txt);
+	message.setBroadcast(true);
 	bytes = message.serializeBinary();
 	websocket.send(bytes);
 }
@@ -137,8 +140,8 @@ function closeWebsocket(){
    
    $('#Open_Button').click(function(){
 	   uid = $('#uid').val();
-	   var pwd = $('#pwd').val();
-	   conn(uid,pwd);
+	   var url = $('#url').val();
+	   conn(uid,url);
    });
    
    $('#Close_Button').click(function(){

@@ -26,19 +26,23 @@ public class UserInfo {
 	private AtomicLong reqTime;// 暂时不考虑重置请求次数，没那么多次
 	private Channel channel;
 	private Set<String> groups;
+	private UserRole role;
 
-	public UserInfo(ChannelHandlerContext ctx, String id) {
+	public UserInfo(ChannelHandlerContext ctx, String id, UserRole role) {
 		channel = ctx.channel();
 		channelId = channel.id().asLongText();
 		reqTime = new AtomicLong(0);
 		uid = id;
-		groups = new HashSet<>();
-		groups.addAll(Group.INSTANCE.getCommonGroup());// 增加默认的group
-		groups.forEach(s -> {
-			boolean flag = GroupManager.INSTANCE.regToGroup(s, channel);
-			System.out.println("reg to "+s+":"+flag);
-		});
-		GroupManager.INSTANCE.addToMembers(this);
+		this.role = role;
+		if (role.equals(UserRole.User)) {
+			groups = new HashSet<>();
+			groups.addAll(Group.INSTANCE.getCommonGroup());// 增加默认的group
+			groups.forEach(s -> {
+				boolean flag = GroupManager.INSTANCE.regToGroup(s, channel);
+				System.out.println("reg to " + s + ":" + flag);
+			});
+			GroupManager.INSTANCE.addToMembers(this);
+		}
 	}
 
 	public String getChannelId() {
@@ -57,7 +61,9 @@ public class UserInfo {
 	 * 用户退出的，退出所有用户组
 	 */
 	public void logout() {
-		GroupManager.INSTANCE.removeChannel(this);
+		if (role.equals(UserRole.User)) {
+			GroupManager.INSTANCE.removeChannel(this);
+		}
 	}
 
 	public String getUid() {
@@ -81,6 +87,9 @@ public class UserInfo {
 	 * @param groupName
 	 */
 	public boolean regGroup(String groupName) {
+		if (role.equals(UserRole.Server)) {
+			return false;
+		}
 		groups.add(groupName);
 		return GroupManager.INSTANCE.regToGroup(groupName, channel);
 	}

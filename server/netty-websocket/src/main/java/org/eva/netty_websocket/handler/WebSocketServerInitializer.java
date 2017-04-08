@@ -19,10 +19,12 @@ public class WebSocketServerInitializer extends ChannelInitializer<Channel> {
 
 	private final SslContext sslCtx;
 	private Injector injector;
+	private String websocket_path;
 
-	public WebSocketServerInitializer(final SslContext sslCtx,Injector injector) {
+	public WebSocketServerInitializer(final SslContext sslCtx,Injector injector,String websocket_path) {
 		this.sslCtx = sslCtx;
 		this.injector = injector;
+		this.websocket_path = websocket_path;
 	}
 
 	@Override
@@ -34,7 +36,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<Channel> {
 		pipeline.addLast(new HttpServerCodec());
 		pipeline.addLast(new HttpObjectAggregator(65536));
 		pipeline.addLast(new WebSocketServerCompressionHandler());
-		pipeline.addLast(new WebSocketServerHandler(injector));
+		pipeline.addLast(new WebSocketServerHandler(injector,websocket_path));
 	}
 
 }

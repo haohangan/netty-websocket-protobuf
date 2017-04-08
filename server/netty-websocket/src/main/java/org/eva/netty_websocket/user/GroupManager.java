@@ -146,25 +146,56 @@ public enum GroupManager {
 		return false;
 	}
 
+	/**
+	 * 判断用户组中是否包含某个用户
+	 * 
+	 * @param tid
+	 * @return
+	 */
+	public boolean containMember(String tid) {
+		if (members.containsKey(tid)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 写给本地存在的用户
+	 * 
+	 * @param tid
+	 * @param msg
+	 */
+	public void writeToLocalMember(String tid, Object msg) {
+		members.get(tid).writeAndFlush(msg);
+	}
+
 	public void showAllMembers() {
 		System.out.println("All Members=======================");
 		members.forEach((k, v) -> {
-			System.out.println(k+":"+v.toString());
+			System.out.println(k + ":" + v.toString());
 		});
 
 		System.out.println("=======================All Members");
 	}
-	
-	
-	public void showGroups(){
+
+	public void showGroups() {
 		System.out.println("All Groups=======================");
-		channelGroupMap.forEach((k,v)->{
-			System.out.println(k.toString()+":"+v.name()+":"+v.isEmpty());
-			v.forEach(c->{
+		channelGroupMap.forEach((k, v) -> {
+			System.out.println(k.toString() + ":" + v.name() + ":" + v.isEmpty());
+			v.forEach(c -> {
 				System.out.println(c.attr(UserInfo.CHANNEL_INFO).get().getUid());
 			});
 			System.out.println("--------------------------------");
 		});
 		System.out.println("=======================All Groups");
+	}
+
+	public void close() {
+		members.forEach((k, v) -> {
+			v.close().awaitUninterruptibly();
+		});
+		channelGroupMap.forEach((k, v) -> {
+			v.close().awaitUninterruptibly();
+		});
 	}
 }

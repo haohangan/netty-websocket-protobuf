@@ -6,12 +6,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.eva.netty_websocket.message.protobuf.WSMessage;
 import org.eva.netty_websocket.message.protobuf.WSMessage.MsgType;
 import org.eva.netty_websocket.util.ProtobufMessageUtil;
+import org.jboss.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 
 import com.google.protobuf.MessageLite;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
@@ -35,7 +35,7 @@ public class WebSocketJavaClient {
 	private AtomicLong reqTime = new AtomicLong(0);
 	private Channel channel;
 	EventLoopGroup group;
-	ChannelFuture lastWriteFuture;
+	// ChannelFuture lastWriteFuture;
 	private URI uri;
 	private String subprotocol;
 
@@ -69,31 +69,43 @@ public class WebSocketJavaClient {
 	}
 
 	public void write(String msg) {
-		lastWriteFuture = channel.writeAndFlush(new TextWebSocketFrame(msg));
+		// lastWriteFuture = channel.writeAndFlush(new TextWebSocketFrame(msg));
+		channel.writeAndFlush(new TextWebSocketFrame(msg));
 	}
 
 	public void write(MessageLite writemsg) {
-		lastWriteFuture = channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		// lastWriteFuture =
+		// channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}
 
 	public void write(String uid, String tid, String msg) {
 		WSMessage writemsg = WSMessage.newBuilder().setType(MsgType.MSG).setMid(reqTime.incrementAndGet()).setUid(uid)
 				.setTId(tid).setTxt(msg).build();
-		lastWriteFuture = channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		// lastWriteFuture =
+		// channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}
 
 	public void writeGroup(String uid, String groupName, String msg) {
 		WSMessage writemsg = WSMessage.newBuilder().setType(MsgType.GROUP).setMid(reqTime.incrementAndGet()).setUid(uid)
 				.setTId(groupName).setTxt(msg).build();
-		lastWriteFuture = channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		// lastWriteFuture =
+		// channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
+		channel.writeAndFlush(ProtobufMessageUtil.getFrame(writemsg));
 	}
 
 	public void close() {
-		if (lastWriteFuture != null) {
-			try {
-				lastWriteFuture.sync();
-			} catch (InterruptedException e) {
-			}
+		// lastWriteFuture = channel.writeAndFlush(new CloseWebSocketFrame());
+		// if (lastWriteFuture != null) {
+		// try {
+		// lastWriteFuture.sync();
+		// } catch (InterruptedException e) {
+		// }
+		// }
+		try {
+			channel.writeAndFlush(new CloseWebSocketFrame()).sync();
+		} catch (InterruptedException e) {
 		}
 		channel.closeFuture();
 		group.shutdownGracefully();

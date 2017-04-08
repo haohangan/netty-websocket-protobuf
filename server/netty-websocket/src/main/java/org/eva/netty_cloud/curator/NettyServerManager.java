@@ -30,9 +30,11 @@ public class NettyServerManager {
 		ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
 		client = CuratorFrameworkFactory.builder().connectString(connectionString).retryPolicy(retryPolicy)
 				.connectionTimeoutMs(connectionTimeoutMs).sessionTimeoutMs(sessionTimeoutMs).build();
-		client.start();
+		client.start();// 初始化zookeeper连接
 
-		cache = new PathChildrenCache(client, pnode, true);
+		client.create().forPath(pnode + "/" + current.getNodeName(), current.toJson().getBytes());
+
+		cache = new PathChildrenCache(client, pnode, true);// 初始化缓存并监听
 		cache.start();
 		PathChildrenCacheListener listener = new ServerCacheListener();
 		cache.getListenable().addListener(listener);
@@ -40,7 +42,11 @@ public class NettyServerManager {
 	}
 
 	public void closeCloud() throws Exception {
-		CloseableUtils.closeQuietly(cache);
-		CloseableUtils.closeQuietly(client);
+		try {
+			client.delete().forPath(pnode + "/" + current.getNodeName());
+		} finally {
+			CloseableUtils.closeQuietly(cache);
+			CloseableUtils.closeQuietly(client);
+		}
 	}
 }

@@ -19,11 +19,17 @@ public class EnableUserNameModel implements DatabaseUser {
 	}
 
 	@Override
-	public boolean checkUserPasswd(String userid, String passwd) {
+	public LoginResult checkUserPasswd(String userid, String passwd) {
 		if (!Strings.isNullOrEmpty(userid)) {
-			return true;
+			LoginResult lr = new LoginResult(true);
+			if (userid.startsWith("app")) {
+				lr.setRole(UserRole.Server);
+			} else {
+				lr.setRole(UserRole.User);
+			}
+			return lr;
 		}
-		return false;
+		return new LoginResult(true, UserRole.Unknown);
 	}
 
 }

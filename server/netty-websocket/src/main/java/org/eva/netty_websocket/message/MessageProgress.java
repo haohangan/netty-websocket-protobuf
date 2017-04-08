@@ -1,5 +1,7 @@
 package org.eva.netty_websocket.message;
 
+import io.netty.channel.ChannelHandlerContext;
+
 /**
  * 解析消息接口
  * @author 976175665
@@ -7,6 +9,6 @@ package org.eva.netty_websocket.message;
  */
 public interface MessageProgress {
 	
-	void progress();//开始解析
+	void progress(ChannelHandlerContext ctx, byte[] bytes)throws Exception ;//开始解析
 	
 }
