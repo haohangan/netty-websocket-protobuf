@@ -12,7 +12,7 @@ import org.eva.netty_websocket.handler.WSServer;
 public class Start {
 	public static void main(String[] args) {
 		try {
-			new WSServer().run(80, CommonParam.WEBSOCKET_PATH);
+			new WSServer().run(8080, CommonParam.WEBSOCKET_PATH);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

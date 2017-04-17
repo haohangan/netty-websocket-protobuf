@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eva.netty_cloud.group.Group;
 import org.eva.netty_websocket.inject.DBInjector;
+import org.eva.netty_websocket.inject.SingleServerProgressModule;
 import org.eva.netty_websocket.user.GroupManager;
 
 import com.google.inject.Guice;
@@ -45,7 +46,7 @@ public class WSServer {
 		}
 
 		System.out.println("初始化依赖控制");
-		injector = Guice.createInjector(new DBInjector());//多个injector
+		injector = Guice.createInjector(new DBInjector(),new SingleServerProgressModule());//多个injector
 		Group.INSTANCE.initGroups();
 		Group.INSTANCE.addSpecial("USERS");
 		GroupManager.INSTANCE.createNewChannelGroup(Group.INSTANCE.getAllGroup());// 初始化时初始化用户组，其他时间不可新增用户组
