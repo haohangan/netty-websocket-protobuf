@@ -17,3 +17,6 @@ http.createServer(function(req, res) {
 
 3:netty proxy
 ???
+
+4：nginx
+性能最好
