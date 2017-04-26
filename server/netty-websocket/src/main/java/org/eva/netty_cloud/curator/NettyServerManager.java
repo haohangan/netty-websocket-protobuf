@@ -31,8 +31,16 @@ public class NettyServerManager {
 		client = CuratorFrameworkFactory.builder().connectString(connectionString).retryPolicy(retryPolicy)
 				.connectionTimeoutMs(connectionTimeoutMs).sessionTimeoutMs(sessionTimeoutMs).build();
 		client.start();// 初始化zookeeper连接
+		
+		String currentPath = pnode + "/" + current.getNodeName();
+		org.apache.zookeeper.data.Stat stat = client.checkExists().forPath(currentPath);
+		if(stat==null){
+			client.create().forPath(currentPath, current.toJson().getBytes());
+		}else{
+			client.setData().forPath(currentPath, current.toJson().getBytes());
+		}
 
-		client.create().forPath(pnode + "/" + current.getNodeName(), current.toJson().getBytes());
+//		client.create().forPath(pnode + "/" + current.getNodeName(), current.toJson().getBytes());
 
 		cache = new PathChildrenCache(client, pnode, true);// 初始化缓存并监听
 		cache.start();

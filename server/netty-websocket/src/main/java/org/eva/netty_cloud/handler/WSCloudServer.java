@@ -85,8 +85,8 @@ public class WSCloudServer {
 
 			// 初始化云端
 			ServerClouds.INSTANCE.init(port, nodeName, connectString);
-			AsynWaitUtil.waitInput(channel);
-			System.out.println("等待关闭输入：q");
+//			AsynWaitUtil.waitInput(channel);
+//			System.out.println("等待关闭输入：q");
 			channel.closeFuture().sync();
 		} finally {
 			System.out.println("关闭的操作===============");
