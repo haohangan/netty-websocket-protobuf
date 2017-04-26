@@ -1,0 +1,18 @@
+1:node http-proxy
+https://www.npmjs.com/package/http-proxy
+var http = require('http'),
+    httpProxy = require('http-proxy'),
+    proxy = httpProxy.createProxyServer({}),
+    url = require('url');
+
+http.createServer(function(req, res) {
+	proxy.web(req, res, { target: 'http://localhost:8080' });
+}).listen(80, function() {
+    console.log('proxy listening on port 80');
+});
+
+2:haproxy
+...
+
+3:netty proxy
+???
